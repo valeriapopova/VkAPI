@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+
+
+{% endblock %}
+
+{% block content_title %}
+    Укажите параметры поиска и свой токен:
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-6">
+    {% for field in form  %}
+        <form id="field.id" action="{{ url_for('search_users_vk') }}" method="POST">
+    {% endfor %}
+
+            {% for field in form  %}
+                <div class="form-group">
+                    {{ field.label(class='control-label') }}
+                    {{ field(class='form-control') }}
+
+                </div>
+            {% endfor %}
+
+            <div class ='form-group-title'>
+
+
+            <input type="submit" class="btn btn-primary mb-2" name="submit_button" value="Создать json">
+
+            </div>
+        </form>
+    </div>
+{% endblock %}
