@@ -27,3 +27,10 @@ def get_city_id(vk, keyword):
         return items['id']
 
 
+def get_confirmation_code(vk, group_id):
+    result = vk.method('groups.getCallbackConfirmationCode', {"group_id": group_id})
+    for k, v in result.items():
+        return v
+
+
+

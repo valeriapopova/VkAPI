@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request, redirect, Response, url_for
+from flask import Flask, render_template, request
 import json
+
+
 from config import Configuration
 from forms import VKForm
 import vk_api
-from vk import get_city_id, search_users
+from vk import get_city_id, search_users, get_confirmation_code
 
 app = Flask(__name__)
 app.config.from_object(Configuration)
@@ -29,3 +31,14 @@ def search_users_vk():
     return render_template('create_json.html', form=form), 200
 
 
+@app.route('/vk/756630756e645f336173313372545444', methods=['POST'])
+def processiong():
+    data = request.get_json(force=True, silent=True)
+    if data:
+        if data['type'] == 'lead_forms_new':
+            name = str(data['object']['answers'][0]['answer'])
+            phone = str(data['object']['answers'][1]['answer'])
+            info = {"data": [{"name": name}, {"phone": phone}]}
+            return info
+    else:
+        return {"data": [{"name": 'TEST_valeria'}, {"phone": '89999999'}]}
