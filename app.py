@@ -31,7 +31,7 @@ def search_users_vk():
     return render_template('create_json.html', form=form), 200
 
 
-@app.route('/vk/756630756e645f336173313372545444', methods=['POST'])
+@app.route('/vk/get_leads', methods=['POST'])
 def processiong():
     data = request.get_json(force=True, silent=True)
     if data:
