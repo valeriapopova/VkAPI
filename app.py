@@ -41,4 +41,4 @@ def processiong():
             info = {"data": [{"name": name}, {"phone": phone}]}
             return info
     else:
-        return {"data": [{"name": 'TEST_valeria'}, {"phone": '89999999'}]}
+        return {"data": [{"name": 'TEST_valery'}, {"phone": '9999999'}]}
