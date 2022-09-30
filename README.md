@@ -20,7 +20,7 @@
 
 - В ссылку
 
-https://oauth.vk.com/authorize?client_id=1&display=page&scope=stats,offline&response_type=token&v=5.131 вместо 1 вставьте id **вашего** приложения. Не забудьте указать scope: https://vk.com/dev/permissions
+https://oauth.vk.com/authorize?client_id=1&display=page&scope=stats,offline&response_type=token&v=5.131 вместо 1 вставьте id **вашего** приложения. Не забудьте указать scope: [Список названий прав доступа](https://dev.vk.com/reference/access-rights), которые необходимы приложению,  или сумма их битовых масок передается в параметре scope в процессе получения ключа доступа.
 
 - Нажимаете разрешить
 
@@ -85,3 +85,29 @@ Responses 200 успешно
 ```
 {"data": [{"name": name}, {"phone": phone}]}
 ```
+
+
+***Авторизационные данные:***
+- access_token пользовательский токен , полученный по инструкции выше
+    - scope: [Список названий прав доступа](https://dev.vk.com/reference/access-rights), которые необходимы приложению,  или сумма их битовых масок передается в параметре scope в процессе получения ключа доступа.
+        - adv доступ к рекламным кабинетам;
+        - groups доступ к группам пользователя;
+        - stats доступ к статистике групп и приложений пользователя, администратором которых он является;
+        - offline доступ к API в любое время.
+
+- для методов get_leads и get_leads_online необходимо генерировать уникальный ключ
+    - id группы
+    - id формы для получения лидов
+    - *ПРОПИСАТЬ СГЕНЕРИРОВАННЫЙ URL В НАСТРОЙКАХ СООБЩЕСТВА***
+        - в сообществе переходим у "управление"
+        - справа "работа с API"
+        - callback api -> адрес (сюда вставить url)
+
+- для рекламных методов:
+    - get_flood_stats (account_id - Идентификатор рекламного кабинета)
+    - get_posts_reach (account_id - Идентификатор рекламного кабинета, ids - Перечисленные через запятую id запрашиваемых объявлений или кампаний)
+    - [get_targeting_stats](https://dev.vk.com/method/ads.getTargetingStats)
+    - [get_targeting](https://dev.vk.com/method/ads.getAdsTargeting)
+    - get_demographics(account_id - Идентификатор рекламного кабинета, ids - Перечисленные через запятую id запрашиваемых объявлений или кампаний)
+    - get_statistic(account_id - Идентификатор рекламного кабинета, ids - Перечисленные через запятую id запрашиваемых объявлений или кампаний)
+

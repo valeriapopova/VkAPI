@@ -34,8 +34,9 @@ def search_users_vk():
     return render_template('create_json.html', form=form), 200
 
 
-@app.route('/vk/get_leads', methods=['POST'])
+@app.route('/vk/get_leads/<key>', methods=['POST'])
 def processiong():
+    # Миграция данных (Сбор данных за период в прошлом)
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
@@ -58,13 +59,17 @@ def processiong():
     info['data'] = [result_list]
     return info
 
-    # data = request.get_json(force=True, silent=True)
-    # if data:
-    #     if data['type'] == 'lead_forms_new':
-    #         name = str(data['object']['answers'][0]['answer'])
-    #         phone = str(data['object']['answers'][1]['answer'])
-    #         info = {"data": [{"name": name}, {"phone": phone}]}
-    #         return info
+
+@app.route('/vk/get_leads_online/<key>', methods=['POST'])
+def processiong():
+#В реальном времени (Сбор данных текущего периода)
+    data = request.get_json(force=True, silent=True)
+    if data:
+        if data['type'] == 'lead_forms_new':
+            name = str(data['object']['answers'][0]['answer'])
+            phone = str(data['object']['answers'][1]['answer'])
+            info = {"data": [{"name": name}, {"phone": phone}]}
+            return info
     # else:
     #     return {"data": [{"name": 'TEST_igor'}, {"phone": '111'}]}
 
@@ -81,7 +86,7 @@ def get_statistic():
     return result
 
 
-@app.route('/vk/ads/get_demographics', methods=['POST'])
+@app.route('/vk/ads_get_demographics', methods=['POST'])
 def get_demographics():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
@@ -93,7 +98,7 @@ def get_demographics():
     return result
 
 
-@app.route('/vk/ads/get_targeting', methods=['POST'])
+@app.route('/vk/ads_get_targeting', methods=['POST'])
 def get_targeting():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
@@ -106,12 +111,14 @@ def get_targeting():
     limit = json_file['limit']
     offset = json_file['offset']
     vk = vk_api.VkApi(token=vk_token)
+    data = {}
     result = get_AdsTargeting(vk, account_id=account_id, client_id=client_id, include_deleted=include_deleted,
                                 campaign_ids=campaign_ids, ad_id=ad_id, limit=limit, offset=offset)
-    return result
+    data['data'] = result['response']
+    return data
 
 
-@app.route('/vk/ads/get_targeting_stats', methods=['POST'])
+@app.route('/vk/ads_get_targeting_stats', methods=['POST'])
 def get_targeting_stats():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
@@ -130,7 +137,7 @@ def get_targeting_stats():
     return result
 
 
-@app.route('/vk/ads/get_posts_reach', methods=['POST'])
+@app.route('/vk/ads_get_posts_reach', methods=['POST'])
 def get_posts_reach():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
@@ -142,12 +149,14 @@ def get_posts_reach():
     return result
 
 
-@app.route('/vk/ads/get_posts_reach', methods=['POST'])
-def get_posts_reach():
+@app.route('/vk/ads_get_flood_stats', methods=['POST'])
+def get_flood_stats():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
     account_id = json_file['account_id']
     vk = vk_api.VkApi(token=vk_token)
+    data = {}
     result = get_FloodStats(vk, account_id=account_id)
-    return result
+    data['data'] = result['response']
+    return data
