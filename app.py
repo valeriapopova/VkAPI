@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 from collections import defaultdict
 
 from flask import Flask, render_template, request
@@ -12,6 +14,19 @@ from vk import get_city_id, search_users, get_confirmation_code, get_leads, ads_
 
 app = Flask(__name__)
 app.config.from_object(Configuration)
+
+
+@app.route('/vk/get_key', methods=['POST'])
+def homepage():
+    """Возвращет пользователю - уникальный сгенерированный URL(только для метода get_leads_online)"""
+    webhook = request.get_json(force=False)
+    webhook_account_name = webhook['account_name']
+    salt = secrets.token_hex(16) + webhook_account_name
+    url = 'https://api.ecomru.ru/vk/get_leads_online'
+    url_key = hashlib.sha256(salt.encode('utf-8')).hexdigest()
+    key = f'{url}/{url_key}'
+    print(key)
+    return key
 
 
 @app.route('/vk/search_users',  methods=['GET', 'POST'])
@@ -34,7 +49,7 @@ def search_users_vk():
     return render_template('create_json.html', form=form), 200
 
 
-@app.route('/vk/get_leads/<key>', methods=['POST'])
+@app.route('/vk/get_leads', methods=['POST'])
 def processiong():
     # Миграция данных (Сбор данных за период в прошлом)
     json_f = request.get_json(force=False)
