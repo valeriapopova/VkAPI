@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 VK_VERSION = '5.131'
 
@@ -49,11 +49,11 @@ def get_leads(vk, group_id, form_id=1):
     return result['leads']
 
 
-def ads_get_statistic(vk, date, account_id=None, ids=None):
+def ads_get_statistic(vk, date_from, date_to,  account_id=None, ids=None):
     """Возвращает статистику показателей эффективности по рекламным объявлениям,
     кампаниям, клиентам или всему кабинету."""
     result = vk.method('ads.getStatistics', {'account_id': account_id, 'period': 'day',
-                       'date_from': date, 'date_to': date, 'ids_type': 'ad', 'ids': ids,
+                       'date_from': date_from, 'date_to': date_to, 'ids_type': 'ad', 'ids': ids,
                                              'v': VK_VERSION})
     r = result.json()
     error = r.get('error')
@@ -144,3 +144,4 @@ def get_budget(vk, account_id=None):
     """Возвращает текущий бюджет рекламного кабинета."""
     result = vk.method('ads.getBudget', {'account_id': account_id, 'v': VK_VERSION})
     return result.json()
+

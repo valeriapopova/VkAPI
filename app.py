@@ -169,6 +169,20 @@ def processiong_():
             pass
 
 
+@app.route('/vk/ads_get_month_statistic', methods=['POST'])
+def get_month_statistic():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    account_id = json_file['account_id']
+    ids = json_file['ids']
+    vk = vk_api.VkApi(token=vk_token)
+    date_from = date.today() - timedelta(days=30)
+    date_to = date.today()
+    result = ads_get_statistic(vk, date_from, date_to, account_id=account_id, ids=ids)
+    return result
+
+
 @app.route('/vk/ads_get_statistic_current_day', methods=['POST'])
 def get_statistic_current_day():
     json_f = request.get_json(force=False)
@@ -178,7 +192,7 @@ def get_statistic_current_day():
     ids = json_file['ids']
     vk = vk_api.VkApi(token=vk_token)
     date_ = date.today()
-    result = ads_get_statistic(vk, date_, account_id=account_id, ids=ids)
+    result = ads_get_statistic(vk, date_, date_, account_id=account_id, ids=ids)
     return result
 
 
@@ -191,7 +205,7 @@ def get_statistic_yesterday():
     ids = json_file['ids']
     vk = vk_api.VkApi(token=vk_token)
     date_ = date.today() - timedelta(days=1)
-    result = ads_get_statistic(vk, date_, account_id=account_id, ids=ids)
+    result = ads_get_statistic(vk, date_, date_, account_id=account_id, ids=ids)
     return result
 
 
