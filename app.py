@@ -150,9 +150,9 @@ def processiong_():
             date_timestamp = data['object']['date']
             date = datetime.fromtimestamp(date_timestamp, tz=None)
             status = str(data['object']['status'])
+            info = {"data": [{"type": type_, "order_id": order_id, "user_id": user_id, "status": status,
+                              "price": price, "date": date}]}
 
-            info = {"data": [{"type": type_}, {"order_id": order_id}, {"user_id": user_id}, {"status": status},
-                             {"price": price}, {"date": date}]}
             return info
         elif data['type'] == 'market_order_edit':
             type_ = 'изменение заказа'
@@ -162,8 +162,8 @@ def processiong_():
             status = str(data['object']['status'])
             date_timestamp = data['object']['date']
             date = datetime.fromtimestamp(date_timestamp, tz=None)
-            info = {"data": [{"type": type_}, {"order_id": order_id}, {"user_id": user_id}, {"status": status},
-                             {"price": price}, {"date": date}]}
+            info = {"data": [{"type": type_, "order_id": order_id, "user_id": user_id, "status": status,
+                             "price": price, "date": date}]}
             return info
         else:
             pass
@@ -179,7 +179,8 @@ def get_month_statistic():
     vk = vk_api.VkApi(token=vk_token)
     date_from = date.today() - timedelta(days=30)
     date_to = date.today()
-    result = ads_get_statistic(vk, date_from, date_to, account_id=account_id, ids=ids)
+    period = 'month'
+    result = ads_get_statistic(vk, date_from, date_to, period, account_id=account_id, ids=ids)
     return result
 
 
@@ -192,7 +193,8 @@ def get_statistic_current_day():
     ids = json_file['ids']
     vk = vk_api.VkApi(token=vk_token)
     date_ = date.today()
-    result = ads_get_statistic(vk, date_, date_, account_id=account_id, ids=ids)
+    period = 'day'
+    result = ads_get_statistic(vk, date_, date_, period, account_id=account_id, ids=ids)
     return result
 
 
@@ -205,7 +207,8 @@ def get_statistic_yesterday():
     ids = json_file['ids']
     vk = vk_api.VkApi(token=vk_token)
     date_ = date.today() - timedelta(days=1)
-    result = ads_get_statistic(vk, date_, date_, account_id=account_id, ids=ids)
+    period = 'day'
+    result = ads_get_statistic(vk, date_, date_, period, account_id=account_id, ids=ids)
     return result
 
 

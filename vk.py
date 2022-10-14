@@ -49,10 +49,10 @@ def get_leads(vk, group_id, form_id=1):
     return result['leads']
 
 
-def ads_get_statistic(vk, date_from, date_to,  account_id=None, ids=None):
+def ads_get_statistic(vk, date_from, date_to, period, account_id=None, ids=None):
     """Возвращает статистику показателей эффективности по рекламным объявлениям,
     кампаниям, клиентам или всему кабинету."""
-    result = vk.method('ads.getStatistics', {'account_id': account_id, 'period': 'day',
+    result = vk.method('ads.getStatistics', {'account_id': account_id, 'period': period,
                        'date_from': date_from, 'date_to': date_to, 'ids_type': 'ad', 'ids': ids,
                                              'v': VK_VERSION})
     r = result.json()
@@ -64,7 +64,13 @@ def ads_get_statistic(vk, date_from, date_to,  account_id=None, ids=None):
     spent = r['response'][0]['stats']['spent']
     impressions = r['response'][0]['stats']['impressions']
     clicks = r['response'][0]['stats']['clicks']
-    info = {"data": [{"spent(потраченные средства)": spent}, {"impressions(просмотры)": impressions}, {"clicks": clicks}]}
+    id_ = r['response'][0]['id']
+    if period == 'day':
+        expense_period = r['response'][0]['stats']['day']
+    else:
+        expense_period = date_from/date_to
+    info = {
+        "data": [{"id": id_, "Expenses": spent, "Impressions": impressions, "Clicks": clicks, "Date": expense_period}]}
     return info
 
 
@@ -81,11 +87,11 @@ def get_demographics(vk, account_id=None, ids=None):
         error_code = r.get('error').get('error_code')
         error_msg = r.get('error').get('error_msg')
         raise ValueError(f"error_code={error_code}, error_msg={error_msg}")
-    spent = r['response'][0]['stats']['spent']
-    impressions = r['response'][0]['stats']['impressions']
-    clicks = r['response'][0]['stats']['clicks']
+    sex = r['response'][0]['stats']['sex']
+    age = r['response'][0]['stats']['age']
+    cities = r['response'][0]['stats']['cities']
     info = {
-        "data": [{"spent(потраченные средства)": spent}, {"impressions(просмотры)": impressions}, {"clicks": clicks}]}
+        "data": [{"cities": cities}, {"age": age}, {"sex": sex}]}
     return info
 
 
