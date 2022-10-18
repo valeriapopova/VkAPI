@@ -9,9 +9,7 @@ from datetime import date, timedelta
 from config import Configuration
 from forms import VKForm
 import vk_api
-from vk import get_city_id, search_users, get_confirmation_code, get_leads, ads_get_statistic, get_demographics, \
-    get_AdsTargeting, get_TargetingStats, get_PostsReach, get_FloodStats
-
+from vk import *
 app = Flask(__name__)
 app.config.from_object(Configuration)
 
@@ -38,7 +36,7 @@ def search_users_vk():
         age_to = request.form['age_to']
         sex = request.form['sex']
         city = request.form['city']
-        city_id = get_city_id(vk, city)
+        city_id = get_city_id_(vk, city)
         count = request.form['count']
         result = {}
         res = search_users(vk, age_from, age_to, sex, city_id, count)
@@ -55,11 +53,11 @@ def processiong():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    group_id = json_file['group_id']
-    form_id = json_file['form_id']
+    group_id = json_file['data'][0]['group_id']
+    form_id = json_file['data'][0]['form_id']
 
     vk = vk_api.VkApi(token=vk_token)
-    result = get_leads(vk, group_id, form_id)
+    result = get_leads_(vk, group_id, form_id)
     info = {}
     result_list = defaultdict(list)
     for r in result:
@@ -71,54 +69,6 @@ def processiong():
             k = r['answers'][counter]['key']
             counter += 1
             result_list[k].append(v)
-
-        # if r['answers'][0]['key']:
-        #     first_name = r['answers'][0]['answer']['value']
-        #     first_name_ = r['answers'][0]['key']
-        # if r['answers'][1]['key']:
-        #     patronymic_name = r['answers'][1]['answer']['value']
-        #     patronymic_name_ = r['answers'][1]['key']
-        # if r['answers'][2]['key']:
-        #     last_name = r['answers'][2]['answer']['value']
-        #     last_name_ = r['answers'][2]['key']
-        # if r['answers'][3]['key']:
-        #     email = r['answers'][3]['answer']['value']
-        #     email_ = r['answers'][3]['key']
-        # if r['answers'][4]['key']:
-        #     phone_number = r['answers'][4]['answer']['value']
-        #     phone_number_ = r['answers'][4]['key']
-        # if r['answers'][5]['key']:
-        #     age = r['answers'][5]['answer']['value']
-        #     age_ = r['answers'][5]['key']
-        # if r['answers'][6]['key']:
-        #     birthday = r['answers'][6]['answer']['value']
-        #     birthday_ = r['answers'][6]['key']
-        # if r['answers'][7]['key']:
-        #     location = r['answers'][7]['answer']['value']
-        #     location_ = r['answers'][7]['key']
-        # if r['answers'][8]['key']:
-        #     custom_0 = r['answers'][8]['answer']['value']
-        #     custom_0_ = r['answers'][8]['key']
-        #
-        # result_list["lead_id"].append(lead_id)
-        # if first_name_:
-        #     result_list[first_name_].append(first_name)
-        # if phone_number_:
-        #     result_list[phone_number_].append(phone_number)
-        # if patronymic_name_:
-        #     result_list[patronymic_name_].append(patronymic_name)
-        # if last_name_:
-        #     result_list[last_name_].append(last_name)
-        # if email_:
-        #     result_list[email_].append(email)
-        # if age_:
-        #     result_list[age_].append(age)
-        # if birthday_:
-        #     result_list[birthday_].append(birthday)
-        # if location_:
-        #     result_list[location_].append(location)
-        # if custom_0_:
-        #     result_list[custom_0_].append(custom_0)
 
     info['data'] = [result_list]
     print(info)
@@ -174,13 +124,13 @@ def get_month_statistic():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    account_id = json_file['account_id']
-    ids = json_file['ids']
+    account_id = item_in('account_id', json_file)
+    ids = item_in('ids', json_file)
     vk = vk_api.VkApi(token=vk_token)
     date_from = date.today() - timedelta(days=30)
     date_to = date.today()
     period = 'month'
-    result = ads_get_statistic(vk, date_from, date_to, period, account_id=account_id, ids=ids)
+    result = ads_get_statistic(vk, date_from, date_to, period, account_id, ids)
     return result
 
 
@@ -189,12 +139,12 @@ def get_statistic_current_day():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    account_id = json_file['account_id']
-    ids = json_file['ids']
+    account_id = item_in('account_id', json_file)
+    ids = item_in('ids', json_file)
     vk = vk_api.VkApi(token=vk_token)
     date_ = date.today()
     period = 'day'
-    result = ads_get_statistic(vk, date_, date_, period, account_id=account_id, ids=ids)
+    result = ads_get_statistic(vk, date_, date_, period, account_id, ids)
     return result
 
 
@@ -203,12 +153,12 @@ def get_statistic_yesterday():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    account_id = json_file['account_id']
-    ids = json_file['ids']
+    account_id = item_in('account_id', json_file)
+    ids = item_in('ids', json_file)
     vk = vk_api.VkApi(token=vk_token)
     date_ = date.today() - timedelta(days=1)
     period = 'day'
-    result = ads_get_statistic(vk, date_, date_, period, account_id=account_id, ids=ids)
+    result = ads_get_statistic(vk, date_, date_, period, account_id, ids)
     return result
 
 
@@ -217,10 +167,10 @@ def get_demographics():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    account_id = json_file['account_id']
-    ids = json_file['ids']
+    account_id = item_in('account_id', json_file)
+    ids = item_in('ids', json_file)
     vk = vk_api.VkApi(token=vk_token)
-    result = get_demographics(vk, account_id=account_id, ids=ids)
+    result = ads_get_demographics(vk, account_id, ids)
     return result
 
 
@@ -229,17 +179,18 @@ def get_targeting():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    account_id = json_file['account_id']
-    client_id = json_file['client_id']
-    include_deleted = json_file['include_deleted']
-    campaign_ids = json_file['campaign_ids']
-    ad_id = json_file['ad_id']
-    limit = json_file['limit']
-    offset = json_file['offset']
+
+    account_id = item_in('account_id', json_file)
+    client_id = item_in('client_id', json_file)
+    include_deleted = item_in('include_deleted', json_file)
+    campaign_ids = item_in('campaign_ids', json_file)
+    limit = item_in('limit', json_file)
+    ad_id = item_in('ad_id', json_file)
+    offset = item_in('offset', json_file)
+
     vk = vk_api.VkApi(token=vk_token)
     data = {}
-    result = get_AdsTargeting(vk, account_id=account_id, client_id=client_id, include_deleted=include_deleted,
-                              campaign_ids=campaign_ids, ad_id=ad_id, limit=limit, offset=offset)
+    result = ads_get_AdsTargeting(vk, account_id, client_id, include_deleted, campaign_ids, ad_id, limit, offset)
     data['data'] = result['response']
     return data
 
@@ -249,17 +200,17 @@ def get_targeting_stats():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    account_id = json_file['account_id']
-    criteria = json_file['criteria']
-    ad_format = json_file['ad_format']
-    ad_platform = json_file['ad_platform']
-    ad_id = json_file['ad_id']
-    link_url = json_file['link_url']
-    link_domain = json_file['link_domain']
+
+    account_id = item_in('account_id', json_file)
+    criteria = item_in('criteria', json_file)
+    ad_format = item_in('ad_format', json_file)
+    ad_platform = item_in('ad_platform', json_file)
+    link_url = item_in('link_url', json_file)
+    ad_id = item_in('ad_id', json_file)
+    link_domain = item_in('link_domain', json_file)
+
     vk = vk_api.VkApi(token=vk_token)
-    result = get_TargetingStats(vk, account_id=account_id,
-                                ad_id=ad_id, criteria=criteria, ad_format=ad_format,
-                                ad_platform=ad_platform, link_url=link_url, link_domain=link_domain)
+    result = ads_get_TargetingStats(vk, account_id, criteria, ad_format, ad_platform, ad_id, link_url, link_domain)
     return result
 
 
@@ -268,10 +219,10 @@ def get_posts_reach():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    account_id = json_file['account_id']
-    ids = json_file['ids']
+    account_id = item_in('account_id', json_file)
+    ids = item_in('ids', json_file)
     vk = vk_api.VkApi(token=vk_token)
-    result = get_PostsReach(vk, account_id=account_id, ids=ids)
+    result = ads_get_PostsReach(vk, account_id, ids)
     return result
 
 
@@ -280,10 +231,10 @@ def get_flood_stats():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    account_id = json_file['account_id']
+    account_id = item_in('account_id', json_file)
     vk = vk_api.VkApi(token=vk_token)
     data = {}
-    result = get_FloodStats(vk, account_id=account_id)
+    result = ads_get_FloodStats(vk, account_id)
     data['data'] = result['response']
     return data
 
@@ -293,9 +244,178 @@ def get_budget():
     json_f = request.get_json(force=False)
     json_file = json.loads(json_f)
     vk_token = json_file['access_token']
-    account_id = json_file['account_id']
+    account_id = item_in('account_id', json_file)
     vk = vk_api.VkApi(token=vk_token)
     data = {}
-    result = get_budget(vk, account_id=account_id)
+    result = ads_get_budget(vk, account_id)
+    data['data'] = result['response']
+    return data
+
+
+@app.route('/vk/market_get_product_by_id', methods=['POST'])
+def get_product_by_id():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    item_ids = json_file['data'][0]['item_ids']
+    vk = vk_api.VkApi(token=vk_token)
+    data = {}
+    result = market_get_product_by_id(vk, item_ids)
+    data['data'] = result['response']
+    return data
+
+
+@app.route('/vk/market_get_order_by_id', methods=['POST'])
+def get_order_by_id():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    order_id = json_file['data'][0]['order_id']
+    user_id = item_in('user_id', json_file)
+    vk = vk_api.VkApi(token=vk_token)
+    data = {}
+    result = market_get_order_by_id(vk, order_id, user_id)
+    data['data'] = result['response']
+    return data
+
+
+@app.route('/vk/market_edit_order', methods=['POST'])
+def edit_order():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    order_id = json_file['data'][0]['order_id']
+    user_id = json_file['data'][0]['user_id']
+
+    merchant_comment = item_in('merchant_comment', json_file)
+    status = item_in('status', json_file)
+    track_number = item_in('track_number', json_file)
+    payment_status = item_in('payment_status', json_file)
+    delivery_price = item_in('delivery_price', json_file)
+
+    vk = vk_api.VkApi(token=vk_token)
+    data = {}
+    result = market_edit_order(vk, user_id, order_id, merchant_comment, status, track_number,
+                               payment_status, delivery_price)
+    data['data'] = result['response']
+    return data
+
+
+@app.route('/vk/market_add', methods=['POST'])
+def market_add_():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    owner_id = json_file['data'][0]['owner_id']
+    name = json_file['data'][0]['name']
+    description = json_file['data'][0]['description']
+
+    category_id = item_in('category_id', json_file)
+    price = item_in('price', json_file)
+    url_ = item_in('url', json_file)
+    sku = item_in('sku', json_file)
+
+    vk = vk_api.VkApi(token=vk_token)
+    data = {}
+    result = market_add(vk, owner_id, name, description, category_id, price, url_, sku)
+    data['data'] = result['response']
+    return data
+
+
+@app.route('/vk/market_edit', methods=['POST'])
+def market_edit_():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    owner_id = json_file['data'][0]['owner_id']
+    item_id = json_file['data'][0]['item_id']
+
+    name = item_in('name', json_file)
+    description = item_in('description', json_file)
+    category_id = item_in('category_id', json_file)
+    price = item_in('price', json_file)
+    url_ = item_in('url', json_file)
+    sku = item_in('sku', json_file)
+
+    vk = vk_api.VkApi(token=vk_token)
+    data = {}
+    result = market_edit(vk, owner_id, item_id, name, description, category_id, price, url_, sku)
+    data['data'] = result['response']
+    return data
+
+
+@app.route('/vk/market_create_comment', methods=['POST'])
+def create_comment():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    owner_id = json_file['data'][0]['owner_id']
+    item_id = json_file['data'][0]['item_id']
+
+    message_ = item_in('message', json_file)
+    attachments = item_in('attachments', json_file)
+    from_group = item_in('from_group', json_file)
+    reply_to_comment = item_in('reply_to_comment', json_file)
+    guid = item_in('guid', json_file)
+
+    vk = vk_api.VkApi(token=vk_token)
+    data = {}
+    result = market_create_comment(vk, owner_id, item_id, message_, attachments, from_group,
+                                   reply_to_comment, guid)
+    data['data'] = result['response']
+    return data
+
+
+@app.route('/vk/market_add_album', methods=['POST'])
+def add_album():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    owner_id = json_file['data'][0]['owner_id']
+    title = json_file['data'][0]['title']
+
+    main_album = item_in('main_album', json_file)
+    photo_id = item_in('photo_id', json_file)
+
+    vk = vk_api.VkApi(token=vk_token)
+    data = {}
+    result = market_add_album(vk, owner_id, title, main_album, photo_id)
+    data['data'] = result['response']
+    return data
+
+
+@app.route('/vk/market_edit_album', methods=['POST'])
+def edit_album():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    owner_id = json_file['data'][0]['owner_id']
+    title = json_file['data'][0]['title']
+    album_id = json_file['data'][0]['album_id']
+
+    main_album = item_in('main_album', json_file)
+    photo_id = item_in('photo_id', json_file)
+
+    vk = vk_api.VkApi(token=vk_token)
+    data = {}
+    result = market_edit_album(vk, owner_id, album_id, title, main_album, photo_id)
+    data['data'] = result['response']
+    return data
+
+
+@app.route('/vk/market_add_to_album', methods=['POST'])
+def add_to_album():
+    json_f = request.get_json(force=False)
+    json_file = json.loads(json_f)
+    vk_token = json_file['access_token']
+    owner_id = json_file['data'][0]['owner_id']
+    album_ids = json_file['data'][0]['album_ids']
+
+    item_id = item_in('item_id', json_file)
+    item_ids = item_in('item_ids', json_file)
+
+    vk = vk_api.VkApi(token=vk_token)
+    data = {}
+    result = market_add_to_album(vk, owner_id, album_ids, item_id, item_ids)
     data['data'] = result['response']
     return data
